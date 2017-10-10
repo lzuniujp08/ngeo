@@ -16,24 +16,38 @@ gmf.datasource.ExternalDataSourcesManager = class {
    * creating, storing and managing them.
    *
    * @param {!angular.$injector} $injector Main injector.
-   * @param {ngeo.datasource.DataSources} ngeoDataSources Ngeo collection of
+   * @param {!angular.Scope} $rootScope The rootScope provider.
+   * @param {!ngeo.datasource.DataSources} ngeoDataSources Ngeo collection of
    *     data sources objects.
+   * @param {!ngeo.LayerHelper} ngeoLayerHelper Ngeo layer helper service
    * @struct
    * @ngInject
    * @ngdoc service
    * @ngname gmfExternalDataSourcesManager
    */
-  constructor($injector, ngeoDataSources) {
+  constructor($injector, $rootScope, ngeoDataSources, ngeoLayerHelper) {
 
     // === Injected properties ===
 
     /**
+     * @type {angular.Scope}
+     * @private
+     */
+    this.rootScope_ = $rootScope;
+
+    /**
      * The collection of DataSources from ngeo. When this service creates
      * a data source, its gets added to that collection.
-     * @type {ngeo.datasource.DataSources}
+     * @type {!ngeo.datasource.DataSources}
      * @private
      */
     this.ngeoDataSources_ = ngeoDataSources;
+
+    /**
+     * @type {!ngeo.LayerHelper}
+     * @private
+     */
+    this.ngeoLayerHelper_ = ngeoLayerHelper;
 
 
     // === Inner properties ===
@@ -45,6 +59,12 @@ gmf.datasource.ExternalDataSourcesManager = class {
      * @private
      */
     this.extDataSources_ = {};
+
+    /**
+     * @type {?ol.Map}
+     * @private
+     */
+    this.map_ = null;
 
     /**
      * @type {!Object.<string, !gmfx.ExternalOGCServer>}
@@ -62,6 +82,58 @@ gmf.datasource.ExternalDataSourcesManager = class {
         }
       }
     }
+
+    /**
+     * Cache of WMS groups, with key being the OnlineResource url of the
+     * WMS service.
+     * @type {!Object.<string, gmf.datasource.ExternalDataSourcesManager.GroupItem>}
+     * @private
+     */
+    this.wmsGroups_ = {};
+
+    /**
+     * The functions to call to unregister the `watch` event on data sources
+     * that are registered. Key is the id of the data source.
+     * @type {!Object.<number, Function>}
+     * @private
+     */
+    this.wmsDataSourceUnregister_ = {};
+  }
+
+  /**
+   * @return {ol.layer.Group} Layer group where to push layers created by
+   *     this service.
+   */
+  get layerGroup() {
+    const map = this.map_;
+    goog.asserts.assert(map);
+    return this.ngeoLayerHelper_.getGroupFromMap(
+      map,
+      gmf.EXTERNALLAYERGROUP_NAME
+    );
+  }
+
+  /**
+   * @param {?ol.Map} map Map
+   */
+  set map(map) {
+    this.map_ = map;
+  }
+
+  /**
+   * @param {ol.layer.Image} layer Layer.
+   * @private
+   */
+  addLayer_(layer) {
+    this.layerGroup.getLayers().push(layer);
+  }
+
+  /**
+   * @param {ol.layer.Image} layer Layer.
+   * @private
+   */
+  removeLayer_(layer) {
+    this.layerGroup.getLayers().remove(layer);
   }
 
   /**
@@ -118,6 +190,119 @@ gmf.datasource.ExternalDataSourcesManager = class {
 
     // Add the data source
     this.ngeoDataSources_.push(dataSource);
+
+    // Create or add service
+    this.registerWMSDataSource_(service, dataSource);
+  }
+
+
+  /**
+   * @param {!Object} service Service
+   * @param {!gmf.datasource.OGC} dataSource OGC data source.
+   * @private
+   */
+  registerWMSDataSource_(service, dataSource) {
+
+    const url = service['OnlineResource'];
+    const id = dataSource.id;
+    let group;
+    let layer;
+    let shouldUpdate = false;
+
+    if (this.wmsGroups_[url]) {
+      group = this.wmsGroups_[url];
+      layer = group.layer;
+    } else {
+      layer = this.ngeoLayerHelper_.createBasicWMSLayerFromDataSource(
+        dataSource
+      );
+      group = {
+        dataSources: [dataSource],
+        layer,
+        service
+      };
+      this.wmsGroups_[url] = group;
+      shouldUpdate = true;
+
+      this.addLayer_(layer);
+    }
+
+    this.wmsDataSourceUnregister_[id] = this.rootScope_.$watch(
+      dataSource.visible,
+      this.handleWMSDataSourceVisibleChange_.bind(this, dataSource)
+    );
+
+    if (shouldUpdate) {
+      this.updateWMSGroupLayer_(group);
+    }
+  }
+
+  /**
+   * @param {!gmf.datasource.OGC} dataSource OGC data source.
+   * @private
+   */
+  unregisterWMSDataSource_(dataSource) {
+    const url = dataSource.wmsUrl;
+    goog.asserts.assert(url);
+
+    const group = this.wmsGroups_[url];
+    const id = dataSource.id;
+
+    // Unregister
+    const unregister = this.wmsDataSourceUnregister_[id];
+    unregister();
+    delete this.wmsDataSourceUnregister_[id];
+
+    // Remove DS from the group
+    ol.array.remove(group.dataSources, dataSource);
+
+    // Remove from the cache
+    delete this.extDataSources_[id];
+
+    if (group.layers.length) {
+      // Force update of the group
+      this.updateWMSGroupLayer_(group);
+    } else {
+      // If we removed the last data source, then get rid of the group as well
+      // and remove the layer
+      this.removeLayer(group.layer);
+      delete this.wmsGroups_[url];
+    }
+  }
+
+  /**
+   * @param {ngeo.datasource.OGC} dataSource OGC data source
+   * @param {boolean|undefined} value Current visible property of the DS
+   * @param {boolean|undefined} oldValue Old visible property of the DS
+   * @private
+   */
+  handleWMSDataSourceVisibleChange_(dataSource, value, oldValue) {
+    if (value !== undefined && value !== oldValue) {
+      const url = dataSource.wmsUrl;
+      goog.asserts.assert(url);
+      const group = this.wmsGroups_[url];
+      this.updateWMSGroupLayer_(group);
+    }
+  }
+
+  /**
+   * @param {gmf.datasource.ExternalDataSourcesManager.GroupItem} group Group
+   *     cache item.
+   * @private
+   */
+  updateWMSGroupLayer_(group) {
+    const layer = group.layer;
+    let layerNames = [];
+
+    // (1) Collect layer names from data sources in the group
+    for (const dataSource of group.dataSources) {
+      if (dataSource.visible) {
+        layerNames = layerNames.concat(dataSource.getOGCLayerNames());
+      }
+    }
+
+    // (2) Update layer object
+    this.ngeoLayerHelper_.updateWMSLayerState(layer, layerNames);
   }
 };
 
@@ -141,3 +326,13 @@ gmf.datasource.ExternalDataSourcesManager.getId = function(layer) {
 
 gmf.module.service(
   'gmfExternalDataSourcesManager', gmf.datasource.ExternalDataSourcesManager);
+
+
+/**
+ * @typedef {{
+ *     dataSources: (Array.<!gmf.datasource.OGC>),
+ *     layer: (!ol.layer.Image),
+ *     service: (!Object)
+ * }}
+ */
+gmf.datasource.ExternalDataSourcesManager.GroupItem;

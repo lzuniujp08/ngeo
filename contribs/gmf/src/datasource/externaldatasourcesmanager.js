@@ -86,7 +86,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
     /**
      * Cache of WMS groups, with key being the OnlineResource url of the
      * WMS service.
-     * @type {!Object.<string, gmf.datasource.ExternalDataSourcesManager.GroupItem>}
+     * @type {!Object.<string, gmfx.datasource.WMSGroup>}
      * @private
      */
     this.wmsGroups_ = {};
@@ -204,6 +204,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
   registerWMSDataSource_(service, dataSource) {
 
     const url = service['OnlineResource'];
+    const title = service['Title'];
     const id = dataSource.id;
     let group;
     let layer;
@@ -212,6 +213,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
     if (this.wmsGroups_[url]) {
       group = this.wmsGroups_[url];
       layer = group.layer;
+      layer.get('querySourceIds').push(id);
     } else {
       layer = this.ngeoLayerHelper_.createBasicWMSLayerFromDataSource(
         dataSource
@@ -219,7 +221,8 @@ gmf.datasource.ExternalDataSourcesManager = class {
       group = {
         dataSources: [dataSource],
         layer,
-        service
+        service,
+        title
       };
       this.wmsGroups_[url] = group;
       shouldUpdate = true;
@@ -247,8 +250,12 @@ gmf.datasource.ExternalDataSourcesManager = class {
 
     const group = this.wmsGroups_[url];
     const id = dataSource.id;
+    const layer = group.layer;
 
-    // Unregister
+    // Remove id reference from layer
+    ol.array.remove(layer.get('querySourceIds'), id);
+
+    // Unregister watcher
     const unregister = this.wmsDataSourceUnregister_[id];
     unregister();
     delete this.wmsDataSourceUnregister_[id];
@@ -286,7 +293,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
   }
 
   /**
-   * @param {gmf.datasource.ExternalDataSourcesManager.GroupItem} group Group
+   * @param {gmfx.datasource.WMSGroup} group Group
    *     cache item.
    * @private
    */
@@ -326,13 +333,3 @@ gmf.datasource.ExternalDataSourcesManager.getId = function(layer) {
 
 gmf.module.service(
   'gmfExternalDataSourcesManager', gmf.datasource.ExternalDataSourcesManager);
-
-
-/**
- * @typedef {{
- *     dataSources: (Array.<!gmf.datasource.OGC>),
- *     layer: (!ol.layer.Image),
- *     service: (!Object)
- * }}
- */
-gmf.datasource.ExternalDataSourcesManager.GroupItem;

@@ -678,6 +678,20 @@ gmfx.datasource.DataSourcePrintReportObject;
 
 
 /**
+ * A group of WMS datasources that all come from the same WMS server. Contains
+ * a reference to an OpenLayers layer that contains all of them.
+ *
+ * @typedef {{
+ *     dataSources: (Array.<!gmf.datasource.OGC>),
+ *     layer: (!ol.layer.Image),
+ *     service: (!Object),
+ *     title: (string)
+ * }}
+ */
+gmfx.datasource.WMSGroup;
+
+
+/**
  * @type {Object}
  */
 let cgxp;

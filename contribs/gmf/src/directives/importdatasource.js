@@ -135,7 +135,6 @@ gmf.ImportdatasourceController = class {
     this.startWorking_();
     this.ngeoQuerent_.wmsGetCapabilities(this.url).then(
       (wmsCapabilities) => {
-        console.log(wmsCapabilities);
         this.wmsCapabilities = wmsCapabilities;
         this.stopWorking_();
       },

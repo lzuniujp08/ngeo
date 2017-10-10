@@ -84,20 +84,35 @@ gmf.datasource.ExternalDataSourcesManager = class {
     }
 
     /**
-     * Cache of WMS groups, with key being the OnlineResource url of the
-     * WMS service.
-     * @type {!Object.<string, gmfx.datasource.WMSGroup>}
-     * @private
-     */
-    this.wmsGroups_ = {};
-
-    /**
      * The functions to call to unregister the `watch` event on data sources
      * that are registered. Key is the id of the data source.
      * @type {!Object.<number, Function>}
      * @private
      */
     this.wmsDataSourceUnregister_ = {};
+
+    /**
+     * Collection of WMS groups.
+     * @type {!ol.Collection.<!gmfx.datasource.WMSGroup>}
+     * @private
+     */
+    this.wmsGroupsCollection_ = new ol.Collection();
+  }
+
+  /**
+   * @param {gmfx.datasource.WMSGroup} wmsGroup WMS group.
+   * @private
+   */
+  addWMSGroup_(wmsGroup) {
+    this.wmsGroupsCollection.push(wmsGroup);
+  }
+
+  /**
+   * @param {gmfx.datasource.WMSGroup} wmsGroup WMS group.
+   * @private
+   */
+  removeWMSGroup_(wmsGroup) {
+    this.wmsGroupsCollection.remove(wmsGroup);
   }
 
   /**
@@ -112,6 +127,40 @@ gmf.datasource.ExternalDataSourcesManager = class {
       gmf.EXTERNALLAYERGROUP_NAME
     );
   }
+
+  /**
+   * @param {string} url Online resource url
+   * @return {?gmfx.datasource.WMSGroup} WMS group.
+   */
+  getWMSGroup(url) {
+    let found = null;
+    for (const wmsGroup of this.wmsGroups) {
+      if (wmsGroup.url === url) {
+        found = wmsGroup;
+        break;
+      }
+    }
+    return found;
+  }
+
+  /**
+   * @return {!Array.<!gmfx.datasource.WMSGroup>} List of WMS groups.
+   * @export
+   */
+  get wmsGroups() {
+    return this.wmsGroupsCollection_.getArray();
+  }
+
+
+  /**
+   * @return {!ol.Collection.<!gmfx.datasource.WMSGroup>} Collection of WMS
+   *     groups.
+   * @export
+   */
+  get wmsGroupsCollection() {
+    return this.wmsGroupsCollection_;
+  }
+
 
   /**
    * @param {?ol.Map} map Map
@@ -206,28 +255,31 @@ gmf.datasource.ExternalDataSourcesManager = class {
     const url = service['OnlineResource'];
     const title = service['Title'];
     const id = dataSource.id;
-    let group;
     let layer;
     let shouldUpdate = false;
 
-    if (this.wmsGroups_[url]) {
-      group = this.wmsGroups_[url];
-      layer = group.layer;
+    let wmsGroup = this.getWMSGroup(url);
+
+    if (wmsGroup) {
+      layer = wmsGroup.layer;
       layer.get('querySourceIds').push(id);
     } else {
       layer = this.ngeoLayerHelper_.createBasicWMSLayerFromDataSource(
         dataSource
       );
-      group = {
+      wmsGroup = {
         dataSources: [dataSource],
         layer,
         service,
-        title
+        title,
+        url
       };
-      this.wmsGroups_[url] = group;
+
       shouldUpdate = true;
 
       this.addLayer_(layer);
+
+      this.addWMSGroup_(wmsGroup);
     }
 
     this.wmsDataSourceUnregister_[id] = this.rootScope_.$watch(
@@ -236,7 +288,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
     );
 
     if (shouldUpdate) {
-      this.updateWMSGroupLayer_(group);
+      this.updateWMSGroupLayer_(wmsGroup);
     }
   }
 
@@ -248,9 +300,10 @@ gmf.datasource.ExternalDataSourcesManager = class {
     const url = dataSource.wmsUrl;
     goog.asserts.assert(url);
 
-    const group = this.wmsGroups_[url];
+    const wmsGroup = this.getWMSGroup(url);
+    goog.asserts.assert(wmsGroup);
     const id = dataSource.id;
-    const layer = group.layer;
+    const layer = wmsGroup.layer;
 
     // Remove id reference from layer
     ol.array.remove(layer.get('querySourceIds'), id);
@@ -261,19 +314,19 @@ gmf.datasource.ExternalDataSourcesManager = class {
     delete this.wmsDataSourceUnregister_[id];
 
     // Remove DS from the group
-    ol.array.remove(group.dataSources, dataSource);
+    ol.array.remove(wmsGroup.dataSources, dataSource);
 
     // Remove from the cache
     delete this.extDataSources_[id];
 
-    if (group.layers.length) {
+    if (wmsGroup.layers.length) {
       // Force update of the group
-      this.updateWMSGroupLayer_(group);
+      this.updateWMSGroupLayer_(wmsGroup);
     } else {
       // If we removed the last data source, then get rid of the group as well
       // and remove the layer
-      this.removeLayer(group.layer);
-      delete this.wmsGroups_[url];
+      this.removeLayer(wmsGroup.layer);
+      this.removeWMSGroup_(wmsGroup);
     }
   }
 
@@ -287,22 +340,23 @@ gmf.datasource.ExternalDataSourcesManager = class {
     if (value !== undefined && value !== oldValue) {
       const url = dataSource.wmsUrl;
       goog.asserts.assert(url);
-      const group = this.wmsGroups_[url];
-      this.updateWMSGroupLayer_(group);
+      const wmsGroup = this.getWMSGroup(url);
+      goog.asserts.assert(wmsGroup);
+      this.updateWMSGroupLayer_(wmsGroup);
     }
   }
 
   /**
-   * @param {gmfx.datasource.WMSGroup} group Group
+   * @param {gmfx.datasource.WMSGroup} wmsGroup WMS group
    *     cache item.
    * @private
    */
-  updateWMSGroupLayer_(group) {
-    const layer = group.layer;
+  updateWMSGroupLayer_(wmsGroup) {
+    const layer = wmsGroup.layer;
     let layerNames = [];
 
     // (1) Collect layer names from data sources in the group
-    for (const dataSource of group.dataSources) {
+    for (const dataSource of wmsGroup.dataSources) {
       if (dataSource.visible) {
         layerNames = layerNames.concat(dataSource.getOGCLayerNames());
       }

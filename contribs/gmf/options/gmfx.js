@@ -685,7 +685,8 @@ gmfx.datasource.DataSourcePrintReportObject;
  *     dataSources: (Array.<!gmf.datasource.OGC>),
  *     layer: (!ol.layer.Image),
  *     service: (!Object),
- *     title: (string)
+ *     title: (string),
+ *     url: (string)
  * }}
  */
 gmfx.datasource.WMSGroup;

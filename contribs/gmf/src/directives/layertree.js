@@ -8,6 +8,7 @@ goog.require('gmf.datasource.ExternalDataSourcesManager');
 goog.require('gmf.Permalink');
 goog.require('gmf.SyncLayertreeMap');
 goog.require('gmf.TreeManager');
+goog.require('gmf.wmsgrouptreeComponent');
 goog.require('ngeo.WMSTime');
 goog.require('ngeo.CreatePopup');
 goog.require('ngeo.LayerHelper');

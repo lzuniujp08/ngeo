@@ -259,8 +259,16 @@
   </li>
 </ul>
 
-<div
+<ul
    class="gmf-layertree-root-external-datasources"
    ng-if="layertreeCtrl.isRoot && gmfLayertreeCtrl.gmfExternalDataSourcesManager.wmsGroups.length">
   external ds
-</div>
+
+  <gmf-wmsgrouptree
+    class="gmf-layertree-node gmf-layertree-depth-1"
+    ng-repeat="wmsGroup in gmfLayertreeCtrl.gmfExternalDataSourcesManager.wmsGroups"
+    wms-group="::wmsGroup"
+  >
+  </gmf-wmsgrouptree>
+
+</ul>

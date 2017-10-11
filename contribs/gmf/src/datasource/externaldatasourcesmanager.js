@@ -261,10 +261,16 @@ gmf.datasource.ExternalDataSourcesManager = class {
     let wmsGroup = this.getWMSGroup(url);
 
     if (wmsGroup) {
+
+      // Update the existing group and layer
       layer = wmsGroup.layer;
       layer.get('querySourceIds').push(id);
       wmsGroup.dataSources.push(dataSource);
+      shouldUpdate = true;
+
     } else {
+
+      // The WMS groupd doesn't exist yet, nor the layer.  Create them.
       layer = this.ngeoLayerHelper_.createBasicWMSLayerFromDataSource(
         dataSource
       );
@@ -275,8 +281,6 @@ gmf.datasource.ExternalDataSourcesManager = class {
         title,
         url
       };
-
-      shouldUpdate = true;
 
       this.addLayer_(layer);
 

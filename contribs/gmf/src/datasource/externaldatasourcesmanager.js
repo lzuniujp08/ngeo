@@ -263,6 +263,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
     if (wmsGroup) {
       layer = wmsGroup.layer;
       layer.get('querySourceIds').push(id);
+      wmsGroup.dataSources.push(dataSource);
     } else {
       layer = this.ngeoLayerHelper_.createBasicWMSLayerFromDataSource(
         dataSource
@@ -283,7 +284,7 @@ gmf.datasource.ExternalDataSourcesManager = class {
     }
 
     this.wmsDataSourceUnregister_[id] = this.rootScope_.$watch(
-      dataSource.visible,
+      () => dataSource.visible,
       this.handleWMSDataSourceVisibleChange_.bind(this, dataSource)
     );
 

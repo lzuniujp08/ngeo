@@ -2,9 +2,27 @@
   class="gmf-layertree-group gmf-layertree-depth-1"
   >
   <a
+    class="gmf-layertree-name"
     href
     ng-click="$ctrl.toggle()"
   >
     <span>{{$ctrl.wmsGroup.title | translate}}</span>
   </a>
 </div>
+
+<ul>
+  <li
+    class="gmf-layertree-node gmf-layertree-depth-2"
+    ng-class="[dataSource.visible ? 'on' : 'off']"
+    ng-repeat="dataSource in $ctrl.wmsGroup.dataSources"
+  >
+    <div class="gmf-layertree-leaf">
+      <a
+        href
+        ng-click="$ctrl.toggleDataSource(dataSource)"
+      >
+        <span>{{dataSource.name | translate}}</span>
+      </a>
+    </div>
+  </li>
+</ul>

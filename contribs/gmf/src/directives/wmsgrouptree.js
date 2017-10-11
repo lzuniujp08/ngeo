@@ -43,6 +43,14 @@ gmf.WmsgrouptreeController = class {
   }
 
   /**
+   * @return {string} Group uid.
+   * @export
+   */
+  getGroupUid() {
+    return `wmsgrouptree-${ol.getUid(this.wmsGroup)}`;
+  }
+
+  /**
    * @export
    */
   toggle() {

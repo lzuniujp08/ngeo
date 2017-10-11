@@ -923,7 +923,7 @@
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L707">contribs/gmf/src/directives/layertree.js:707</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L731">contribs/gmf/src/directives/layertree.js:731</a>
     </div>
     
 
@@ -1105,7 +1105,7 @@ a reorder of the first-level groups. Then update the permalink.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L595">contribs/gmf/src/directives/layertree.js:595</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L619">contribs/gmf/src/directives/layertree.js:619</a>
     </div>
     
 
@@ -1236,7 +1236,7 @@ a reorder of the first-level groups. Then update the permalink.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L568">contribs/gmf/src/directives/layertree.js:568</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L592">contribs/gmf/src/directives/layertree.js:592</a>
     </div>
     
 
@@ -1559,14 +1559,14 @@ string for internal WMS layers without multiple childlayers in the node.</p>
 
     
 
-    <h4 class="name" id="getLegendURL"><span class="type-signature"></span>getLegendURL<span class="signature">(treeCtrl)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getLegendsObject"><span class="type-signature"></span>getLegendsObject<span class="signature">(treeCtrl)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Get the legend URL for the given treeCtrl.</p>
+    <p>Get the legends object (<LayerName: url> for each layer) for the given treeCtrl.</p>
 </div>
 
 
@@ -1659,7 +1659,7 @@ string for internal WMS layers without multiple childlayers in the node.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L519">contribs/gmf/src/directives/layertree.js:519</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L520">contribs/gmf/src/directives/layertree.js:520</a>
     </div>
     
 
@@ -1687,10 +1687,11 @@ string for internal WMS layers without multiple childlayers in the node.</p>
         
 <div class="param-desc">
 
-    string|undefined
+    <a href="Object.<string, string>.html">Object.<string, string></a>
 
 
-    <p>The legend URL or undefined.</p>
+    <p>A <layerName: url> object that provides a
+    layer for each layer.</p>
 
 </div>
 
@@ -1836,6 +1837,150 @@ Return a class name that match with the current node activation state.</p>
 
 
     <p>'on' or 'off' or 'indeterminate'.</p>
+
+</div>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getNumberOfLegendsObject"><span class="type-signature"></span>getNumberOfLegendsObject<span class="signature">(treeCtrl)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Get the number of legends object for this layertree controller.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>treeCtrl</code></td>
+            
+
+            <td class="type">
+            
+                <a href="ngeo.LayertreeController.html">ngeo.LayertreeController</a>
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>ngeo layertree controller, from
+    the current node.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <div class="tag-source">
+    
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L566">contribs/gmf/src/directives/layertree.js:566</a>
+    </div>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+
+    number
+
+
+    <p>The number of Legends object.</p>
 
 </div>
 
@@ -2087,7 +2232,7 @@ the min/max resolution in the node.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L695">contribs/gmf/src/directives/layertree.js:695</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L719">contribs/gmf/src/directives/layertree.js:719</a>
     </div>
     
 
@@ -2332,7 +2477,7 @@ a ngeo layertree destroy event.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L645">contribs/gmf/src/directives/layertree.js:645</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L669">contribs/gmf/src/directives/layertree.js:669</a>
     </div>
     
 
@@ -2425,7 +2570,7 @@ a ngeo layertree destroy event.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L636">contribs/gmf/src/directives/layertree.js:636</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L660">contribs/gmf/src/directives/layertree.js:660</a>
     </div>
     
 
@@ -2551,7 +2696,7 @@ a ngeo layertree destroy event.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L628">contribs/gmf/src/directives/layertree.js:628</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L652">contribs/gmf/src/directives/layertree.js:652</a>
     </div>
     
 
@@ -2808,7 +2953,7 @@ a ngeo layertree destroy event.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L685">contribs/gmf/src/directives/layertree.js:685</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L709">contribs/gmf/src/directives/layertree.js:709</a>
     </div>
     
 
@@ -2938,7 +3083,7 @@ a ngeo layertree destroy event.</p>
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L674">contribs/gmf/src/directives/layertree.js:674</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L698">contribs/gmf/src/directives/layertree.js:698</a>
     </div>
     
 
@@ -3226,7 +3371,7 @@ and optionally the end datetime (for time range selection) selected by user</p><
     
     <div class="tag-source">
     
-        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L656">contribs/gmf/src/directives/layertree.js:656</a>
+        <a href="https://github.com/camptocamp/ngeo/blob/2.2/contribs/gmf/src/directives/layertree.js#L680">contribs/gmf/src/directives/layertree.js:680</a>
     </div>
     
 
